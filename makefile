@@ -1,9 +1,9 @@
 .PHONY: all clean 
 
-CFLAGS= -c -Wall -pthread -std=c++1z
+CFLAGS= -c -Wall -pthread -std=c++1z -g3
 
 all: main.o parse.o search_server.o
-	g++ -std=c++1z -pthread -o test main.o parse.o search_server.o
+	g++ -g3 -std=c++1z -pthread -o test main.o parse.o search_server.o
 main.o:	main.cpp
 	g++ $(CFLAGS) $^
 parse.o:	parse.cpp parse.h
