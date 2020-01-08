@@ -1,0 +1,5 @@
+document count 10'000
+words in document 100
+queries count 20'000
+words in a query 10
+time limit 45.00 s
