@@ -1,10 +1,17 @@
 #include "search_server.h"
 #include "iterator_range.h"
+#include "profile.h"
 
 #include <algorithm>
 #include <iterator>
 #include <sstream>
 #include <iostream>
+
+istream& ReadLine(istream& input, string& s, TotalDuration& dest) {
+ ADD_DURATION(dest);
+ return getline(input, s);
+ 
+ }
 
 vector<string> SplitIntoWords(const string& line) {
   istringstream words_input(line);
@@ -25,11 +32,17 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
   index = move(new_index);
 }
 
+auto SplitIntoWordsDura (string& s, TotalDuration& t) {
+	ADD_DURATION(t);
+	return SplitIntoWords(s);
+}
 void SearchServer::AddQueriesStream(
   istream& query_input, ostream& search_results_output
 ) {
-  for (string current_query; getline(query_input, current_query); ) {
-    const auto words = SplitIntoWords(current_query);
+	TotalDuration read("Total read");
+	TotalDuration split("Total split");
+  for (string current_query; ReadLine(query_input, current_query, read); ) {
+    const auto words = SplitIntoWordsDura(current_query,split);
 
     map<size_t, size_t> docid_count;
     for (const auto& word : words) {

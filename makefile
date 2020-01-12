@@ -1,14 +1,14 @@
 .PHONY: all clean 
 
-CFLAGS= -c -Wall -pthread -std=c++1z -O3
+CFLAGS= -Wall -pthread -std=c++1z -O3
 
-all: main.o parse.o search_server.o
-	g++ -g3 -std=c++1z -pthread -o test main.o parse.o search_server.o
+all: main.o parse.o search_server.o 
+	g++ -o test $(CFLAGS) $^
 main.o:	main.cpp
-	g++ $(CFLAGS) $^
+	g++ -c $(CFLAGS) $^
 parse.o:	parse.cpp parse.h
-	g++ $(CFLAGS) $<
+	g++ -c $(CFLAGS) $<
 search_server.o:	search_server.cpp search_server.h
-	g++ $(CFLAGS) $<
+	g++ -c $(CFLAGS) $<
 clean:
 	rm -f *.o test
