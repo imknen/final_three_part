@@ -41,19 +41,27 @@ void SearchServer::AddQueriesStream(
 ) {
 	TotalDuration read("Total read");
 	TotalDuration split("Total split");
+	TotalDuration lookup("Total lookup");
+	TotalDuration speed_sort("Total work sort");
+	TotalDuration form_res("Forming result");
   for (string current_query; ReadLine(query_input, current_query, read); ) {
     const auto words = SplitIntoWordsDura(current_query,split);
 
     map<size_t, size_t> docid_count;
+		{ADD_DURATION(lookup);
     for (const auto& word : words) {
       for (const size_t docid : index.Lookup(word)) {
         docid_count[docid]++;
       }
     }
+		}
 
-    vector<pair<size_t, size_t>> search_results(
+    vector<pair<size_t, size_t>> search_results{
       docid_count.begin(), docid_count.end()
-    );
+    };
+
+		{
+		ADD_DURATION(speed_sort);
     sort(
       begin(search_results),
       end(search_results),
@@ -65,7 +73,9 @@ void SearchServer::AddQueriesStream(
         return make_pair(lhs_hit_count, -lhs_docid) > make_pair(rhs_hit_count, -rhs_docid);
       }
     );
-
+		}
+		{
+		ADD_DURATION(form_res);
     search_results_output << current_query << ':';
     for (auto [docid, hitcount] : Head(search_results, 5)) {
       search_results_output << " {"
@@ -73,6 +83,7 @@ void SearchServer::AddQueriesStream(
         << "hitcount: " << hitcount << '}';
     }
     search_results_output << endl;
+		}
   }
 }
 
