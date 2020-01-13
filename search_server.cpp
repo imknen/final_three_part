@@ -44,10 +44,11 @@ void SearchServer::AddQueriesStream(
 	TotalDuration lookup("Total lookup");
 	TotalDuration speed_sort("Total work sort");
 	TotalDuration form_res("Forming result");
+	TotalDuration make_vec_pair("Total add vect_pair");
   for (string current_query; ReadLine(query_input, current_query, read); ) {
     const auto words = SplitIntoWordsDura(current_query,split);
 
-    map<size_t, size_t> docid_count;
+    vector<size_t> docid_count(10'000);
 		{ADD_DURATION(lookup);
     for (const auto& word : words) {
       for (const size_t docid : index.Lookup(word)) {
@@ -56,23 +57,30 @@ void SearchServer::AddQueriesStream(
     }
 		}
 
-    vector<pair<size_t, size_t>> search_results{
-      docid_count.begin(), docid_count.end()
-    };
+    vector<pair<size_t, size_t>> search_results;
+		search_results.reserve(10'000);
+		{
+		ADD_DURATION(make_vec_pair);
+		for (size_t i = 0;i < 10'000; i++) {
+			if (docid_count[i] > 0) {
+				search_results.push_back({i, docid_count[i]});
+			}
+		}
+		}
 
 		{
 		ADD_DURATION(speed_sort);
-    sort(
-      begin(search_results),
-      end(search_results),
-      [](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
-        int64_t lhs_docid = lhs.first;
-        auto lhs_hit_count = lhs.second;
-        int64_t rhs_docid = rhs.first;
-        auto rhs_hit_count = rhs.second;
-        return make_pair(lhs_hit_count, -lhs_docid) > make_pair(rhs_hit_count, -rhs_docid);
-      }
-    );
+						sort(
+							begin(search_results),
+							end(search_results),
+							[](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
+								int64_t lhs_docid = lhs.first;
+								auto lhs_hit_count = lhs.second;
+								int64_t rhs_docid = rhs.first;
+								auto rhs_hit_count = rhs.second;
+								return make_pair(lhs_hit_count, -lhs_docid) > make_pair(rhs_hit_count, -rhs_docid);
+							}
+						);
 		}
 		{
 		ADD_DURATION(form_res);
