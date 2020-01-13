@@ -48,7 +48,7 @@ void SearchServer::AddQueriesStream(
   for (string current_query; ReadLine(query_input, current_query, read); ) {
     const auto words = SplitIntoWordsDura(current_query,split);
 
-    vector<size_t> docid_count(10'000);
+    vector<size_t> docid_count(10'000, 0);
 		{ADD_DURATION(lookup);
     for (const auto& word : words) {
       for (const size_t docid : index.Lookup(word)) {
@@ -70,8 +70,9 @@ void SearchServer::AddQueriesStream(
 
 		{
 		ADD_DURATION(speed_sort);
-						sort(
+						partial_sort(
 							begin(search_results),
+							begin(search_results)+5,
 							end(search_results),
 							[](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
 								int64_t lhs_docid = lhs.first;
