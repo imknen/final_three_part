@@ -71,9 +71,9 @@ void SearchServer::AddQueriesStream(
 		{
 		ADD_DURATION(speed_sort);
 						partial_sort(
-							begin(search_results),
-							begin(search_results)+5,
-							end(search_results),
+							search_results.begin(),
+							search_results.begin() +5,
+							search_results.end(),
 							[](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
 								int64_t lhs_docid = lhs.first;
 								auto lhs_hit_count = lhs.second;

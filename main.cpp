@@ -241,5 +241,5 @@ int main() {
   RUN_TEST(tr, TestHitcount);
   RUN_TEST(tr, TestRanking);
   RUN_TEST(tr, TestBasicSearch);
-//	TestSpeed();
+	TestSpeed();
 }

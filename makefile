@@ -1,6 +1,6 @@
 .PHONY: all clean 
 
-CFLAGS= -Wall -pthread -std=c++1z -g3
+CFLAGS= -Wall -pthread -std=c++1z -O3
 
 all: main.o parse.o search_server.o 
 	g++ -o test $(CFLAGS) $^
