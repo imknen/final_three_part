@@ -79,7 +79,7 @@ void TestSerpFormat() {
     Join(' ', vector{
       "the:",
       "{docid: 0, hitcount: 1}",
-      "{docid: 1, hitcount: 1}"
+      "{docid: 1, hitcount: 1}",
     })
   };
 
