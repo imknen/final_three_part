@@ -1,7 +1,7 @@
 #include "search_server.h"
 #include "parse.h"
 #include "test_runner.h"
-#include "profile.h"
+#include "duration.h"
 
 #include <algorithm>
 #include <iterator>

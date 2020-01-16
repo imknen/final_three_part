@@ -1,17 +1,12 @@
 #include "search_server.h"
 #include "iterator_range.h"
-#include "profile.h"
+#include "duration.h"
 
 #include <algorithm>
 #include <iterator>
 #include <sstream>
 #include <iostream>
 
-istream& ReadLine(istream& input, string& s, TotalDuration& dest) {
- ADD_DURATION(dest);
- return getline(input, s);
- 
- }
 
 vector<string> SplitIntoWords(const string& line) {
   istringstream words_input(line);
@@ -45,7 +40,7 @@ void SearchServer::AddQueriesStream(
 	TotalDuration speed_sort("Total work sort");
 	TotalDuration form_res("Forming result");
 	TotalDuration make_vec_pair("Total add vect_pair");
-  for (string current_query; ReadLine(query_input, current_query, read); ) {
+  for (string current_query; getline(query_input, current_query); ) {
     const auto words = SplitIntoWordsDura(current_query,split);
 
     vector<size_t> docid_count(10'000, 0);
@@ -58,7 +53,7 @@ void SearchServer::AddQueriesStream(
 		}
 
     vector<pair<size_t, size_t>> search_results;
-		search_results.reserve(10'000);
+		search_results.reserve(10'005);
 		{
 		ADD_DURATION(make_vec_pair);
 		for (size_t i = 0;i < 10'000; i++) {
