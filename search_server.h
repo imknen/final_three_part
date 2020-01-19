@@ -1,5 +1,4 @@
 #pragma once
-#include "profile.h"
 
 #include <istream>
 #include <ostream>
@@ -13,14 +12,14 @@ using namespace std;
 class InvertedIndex {
 public:
   void Add(const string& document);
-  list<size_t> Lookup(const string& word) const;
+  vector<size_t> Lookup(const string& word) const;
 
   const string& GetDocument(size_t id) const {
     return docs[id];
   }
 
 private:
-  map<string, list<size_t>> index;
+  map<string, vector<size_t>> index;
   vector<string> docs;
 };
 

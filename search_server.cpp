@@ -43,7 +43,7 @@ void SearchServer::AddQueriesStream(
   for (string current_query; getline(query_input, current_query); ) {
     const auto words = SplitIntoWordsDura(current_query,split);
 
-    vector<size_t> docid_count(10'000, 0);
+    vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
     for (const auto& word : words) {
       for (const size_t docid : index.Lookup(word)) {
@@ -53,23 +53,24 @@ void SearchServer::AddQueriesStream(
 		}
 
     vector<pair<size_t, size_t>> search_results;
-		search_results.reserve(10'005);
+		search_results.reserve(55'005);
 		{
 		ADD_DURATION(make_vec_pair);
-		for (size_t i = 0;i < 10'000; i++) {
+		for (size_t i = 0;i < 20'000; i++) {
 			if (docid_count[i] > 0) {
 				search_results.push_back({i, docid_count[i]});
 			}
 		}
 		}
 
+		if (search_results.size() < 0) {continue;}
 		{
 		ADD_DURATION(speed_sort);
-						partial_sort(
+						sort(
 							search_results.begin(),
-							search_results.begin() +5,
+						//	search_results.begin() +5,
 							search_results.end(),
-							[](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
+							[](const pair<size_t, size_t>& lhs,const pair<size_t, size_t>& rhs) {
 								int64_t lhs_docid = lhs.first;
 								auto lhs_hit_count = lhs.second;
 								int64_t rhs_docid = rhs.first;
@@ -86,7 +87,7 @@ void SearchServer::AddQueriesStream(
         << "docid: " << docid << ", "
         << "hitcount: " << hitcount << '}';
     }
-    search_results_output << endl;
+    search_results_output << '\n';
 		}
   }
 }
@@ -100,10 +101,18 @@ void InvertedIndex::Add(const string& document) {
   }
 }
 
-list<size_t> InvertedIndex::Lookup(const string& word) const {
+vector<size_t> InvertedIndex::Lookup(const string& word) const {
   if (auto it = index.find(word); it != index.end()) {
     return it->second;
   } else {
     return {};
   }
+//ние
+//￼	
+//￼
+//Разделы О проекте
+//﻿
+//C++ для начинающих
+//Липпман Стенли
+//Ал}
 }

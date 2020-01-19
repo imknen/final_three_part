@@ -19,7 +19,7 @@ void TestSpeed ()
 {
 	ifstream documents("documents.txt");
 	ifstream queries("queries.txt");
-
+/*
 	vector<string> docs;
 	docs.reserve(10'000);
 	vector<string> quer;
@@ -35,7 +35,9 @@ size_t count = 0;
 		if (count++ > 15000) break;
 	}
 	istringstream docs_input(Join('\n', docs));
+
 	istringstream queries_input(Join('\n', quer));
+*/
 	SearchServer srv;
 	LOG_DURATION ("add data in srv speed") {
 		srv.UpdateDocumentBase(documents);
