@@ -69,7 +69,7 @@ void SearchServer::AddQueriesStream(
 							search_results.begin(),
 							search_results.begin() +5,
 							search_results.end(),
-							[](pair<size_t, size_t> lhs, pair<size_t, size_t> rhs) {
+							[](const pair<size_t, size_t>& lhs,const pair<size_t, size_t>& rhs) {
 								int64_t lhs_docid = lhs.first;
 								auto lhs_hit_count = lhs.second;
 								int64_t rhs_docid = rhs.first;
@@ -86,7 +86,7 @@ void SearchServer::AddQueriesStream(
         << "docid: " << docid << ", "
         << "hitcount: " << hitcount << '}';
     }
-    search_results_output << endl;
+    search_results_output << '\n';
 		}
   }
 }
@@ -106,4 +106,12 @@ list<size_t> InvertedIndex::Lookup(const string& word) const {
   } else {
     return {};
   }
+//ние
+//￼	
+//￼
+//Разделы О проекте
+//﻿
+//C++ для начинающих
+//Липпман Стенли
+//Ал}
 }
