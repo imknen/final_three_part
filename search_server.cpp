@@ -39,7 +39,8 @@ void SearchServer::AddQueriesStream(
 	TotalDuration lookup("Total lookup");
 	TotalDuration speed_sort("Total work sort");
 	TotalDuration form_res("Forming result");
-	TotalDuration make_vec_pair("Total add vect_pair");
+	TotalDuration fill_vec_pair("Total fill vect_pair");
+
   for (string current_query; getline(query_input, current_query); ) {
     const auto words = SplitIntoWordsDura(current_query,split);
 
@@ -55,8 +56,8 @@ void SearchServer::AddQueriesStream(
     vector<pair<size_t, size_t>> search_results;
 		search_results.reserve(55'005);
 		{
-		ADD_DURATION(make_vec_pair);
-		for (size_t i = 0;i < 20'000; i++) {
+		ADD_DURATION(fill_vec_pair);
+		for (size_t i = 0;i < 50'000; i++) {
 			if (docid_count[i] > 0) {
 				search_results.push_back({i, docid_count[i]});
 			}
