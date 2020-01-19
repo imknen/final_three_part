@@ -107,12 +107,4 @@ vector<size_t> InvertedIndex::Lookup(const string& word) const {
   } else {
     return {};
   }
-//ние
-//￼	
-//￼
-//Разделы О проекте
-//﻿
-//C++ для начинающих
-//Липпман Стенли
-//Ал}
 }
