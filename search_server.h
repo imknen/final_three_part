@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <deque>
 using namespace std;
 
 class InvertedIndex {
