@@ -17,27 +17,9 @@ using namespace std;
 
 void TestSpeed ()
 {
-	ifstream documents("documents.txt");
-	ifstream queries("queries.txt");
-/*
-	vector<string> docs;
-	docs.reserve(10'000);
-	vector<string> quer;
-	quer.reserve(20'000);
-size_t count = 0;
-	for (string line; getline(documents, line);) {
-		docs.push_back(line);
-		if(count++ > 7500) break;
-	}
-	count = 0;
-	for (string line; getline(queries, line);) {
-		quer.push_back(line);
-		if (count++ > 15000) break;
-	}
-	istringstream docs_input(Join('\n', docs));
+	ifstream documents("docum_50000_50.txt");
+	ifstream queries("queries_50000_10.txt");
 
-	istringstream queries_input(Join('\n', quer));
-*/
 	SearchServer srv;
 	LOG_DURATION ("add data in srv speed") {
 		srv.UpdateDocumentBase(documents);

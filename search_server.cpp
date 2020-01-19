@@ -63,7 +63,6 @@ void SearchServer::AddQueriesStream(
 		}
 		}
 
-		if (search_results.size() < 0) {continue;}
 		{
 		ADD_DURATION(speed_sort);
 						sort(
