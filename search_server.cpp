@@ -43,7 +43,7 @@ void SearchServer::AddQueriesStream(
   for (string current_query; getline(query_input, current_query); ) {
     const auto words = SplitIntoWordsDura(current_query,split);
 
-    vector<size_t> docid_count(10'000, 0);
+    vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
     for (const auto& word : words) {
       for (const size_t docid : index.Lookup(word)) {
@@ -53,10 +53,10 @@ void SearchServer::AddQueriesStream(
 		}
 
     vector<pair<size_t, size_t>> search_results;
-		search_results.reserve(10'005);
+		search_results.reserve(55'005);
 		{
 		ADD_DURATION(make_vec_pair);
-		for (size_t i = 0;i < 10'000; i++) {
+		for (size_t i = 0;i < 20'000; i++) {
 			if (docid_count[i] > 0) {
 				search_results.push_back({i, docid_count[i]});
 			}
