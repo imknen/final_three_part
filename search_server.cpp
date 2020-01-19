@@ -63,11 +63,12 @@ void SearchServer::AddQueriesStream(
 		}
 		}
 
+		if (search_results.size() < 0) {continue;}
 		{
 		ADD_DURATION(speed_sort);
-						partial_sort(
+						sort(
 							search_results.begin(),
-							search_results.begin() +5,
+						//	search_results.begin() +5,
 							search_results.end(),
 							[](const pair<size_t, size_t>& lhs,const pair<size_t, size_t>& rhs) {
 								int64_t lhs_docid = lhs.first;
@@ -100,7 +101,7 @@ void InvertedIndex::Add(const string& document) {
   }
 }
 
-list<size_t> InvertedIndex::Lookup(const string& word) const {
+vector<size_t> InvertedIndex::Lookup(const string& word) const {
   if (auto it = index.find(word); it != index.end()) {
     return it->second;
   } else {
