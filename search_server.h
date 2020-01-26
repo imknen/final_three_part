@@ -12,6 +12,9 @@ using namespace std;
 
 class InvertedIndex {
 public:
+	
+	InvertedIndex() {docs.reserve(50'000);}
+
   void Add(const string&& document);
   const deque<size_t>& Lookup(const string& word) const;
 
@@ -21,7 +24,7 @@ public:
 
 private:
   map<string, deque<size_t>> index;
-  deque<string> docs;
+  vector<string> docs;
 	deque<size_t> tempor;
 };
 
