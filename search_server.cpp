@@ -8,9 +8,14 @@
 #include <iostream>
 
 
-vector<string> SplitIntoWords(const string& line) {
-  istringstream words_input(line);
-  return {istream_iterator<string>(words_input), istream_iterator<string>()};
+vector<string> SplitIntoWords(const string&& line) {
+  istringstream words_input(move(line));
+ // return {istream_iterator<string>(words_input), istream_iterator<string>()};
+ vector<string> ret;
+ for (string s; words_input >> s;) {
+ 	ret.push_back(move(s));
+ }
+ return ret;
 }
 
 SearchServer::SearchServer(istream& document_input) {
@@ -18,18 +23,18 @@ SearchServer::SearchServer(istream& document_input) {
 }
 
 void SearchServer::UpdateDocumentBase(istream& document_input) {
-  InvertedIndex new_index;
+  //InvertedIndex new_index;
 
   for (string current_document; getline(document_input, current_document); ) {
-    new_index.Add(move(current_document));
+    index.Add(move(current_document));
   }
 
-  index = move(new_index);
+//  index = move(new_index);
 }
 
 auto SplitIntoWordsDura (string& s, TotalDuration& t) {
 	ADD_DURATION(t);
-	return SplitIntoWords(s);
+	return SplitIntoWords(move(s));
 }
 void SearchServer::AddQueriesStream(
   istream& query_input, ostream& search_results_output
@@ -42,7 +47,7 @@ void SearchServer::AddQueriesStream(
 	TotalDuration fill_vec_pair("Total fill vect_pair");
 
   for (string current_query; getline(query_input, current_query); ) {
-    const auto words = SplitIntoWordsDura(current_query,split);
+    const auto words = SplitIntoWords(move(current_query));
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
@@ -92,20 +97,20 @@ void SearchServer::AddQueriesStream(
   }
 }
 
-void InvertedIndex::Add(const string& document) {
+void InvertedIndex::Add(const string&& document) {
   docs.push_back(document);
 
   const size_t docid = docs.size() - 1;
-  for (const auto& word : SplitIntoWords(document)) {
-    index[word].push_back(docid);
+  for (auto&& word : SplitIntoWords(move(document))) {
+    index[move(word)].push_back(docid);
   }
 }
 
-vector<size_t> InvertedIndex::Lookup(const string& word) const {
+const deque<size_t>& InvertedIndex::Lookup(const string& word) const {
   if (auto it = index.find(word); it != index.end()) {
     return it->second;
   } else {
-    return {};
+    return tempor; 
   }
 //ние
 //￼	

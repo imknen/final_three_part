@@ -12,16 +12,17 @@ using namespace std;
 
 class InvertedIndex {
 public:
-  void Add(const string& document);
-  vector<size_t> Lookup(const string& word) const;
+  void Add(const string&& document);
+  const deque<size_t>& Lookup(const string& word) const;
 
   const string& GetDocument(size_t id) const {
     return docs[id];
   }
 
 private:
-  map<string, vector<size_t>> index;
-  vector<string> docs;
+  map<string, deque<size_t>> index;
+  deque<string> docs;
+	deque<size_t> tempor;
 };
 
 class SearchServer {
