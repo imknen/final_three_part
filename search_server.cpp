@@ -112,4 +112,12 @@ const deque<size_t>& InvertedIndex::Lookup(const string& word) const {
   } else {
     return tempor; 
   }
+//ние
+//￼	
+//￼
+//Разделы О проекте
+//﻿
+//C++ для начинающих
+//Липпман Стенли
+//Ал}
 }
