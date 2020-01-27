@@ -42,7 +42,7 @@ void SearchServer::AddQueriesStream(
 	TotalDuration read("Total read");
 	TotalDuration split("Total split");
 	TotalDuration lookup("Total lookup");
-	TotalDuration speed_sort("Total work sort");
+	TotalDuration speed_sort("Topositiontal work sort");
 	TotalDuration form_res("Forming result");
 	TotalDuration fill_vec_pair("Total fill vect_pair");
 
@@ -102,11 +102,11 @@ void InvertedIndex::Add(const string&& document) {
 
   const size_t docid = docs.size() - 1;
   for (auto&& word : SplitIntoWords(move(document))) {
-    index[move(word)].push_back(docid);
+    index[move(word)][docid]++;
   }
 }
 
-const deque<size_t>& InvertedIndex::Lookup(const string& word) const {
+const IdDocCountWord& InvertedIndex::Lookup(const string& word) const {
   if (auto it = index.find(word); it != index.end()) {
     return it->second;
   } else {

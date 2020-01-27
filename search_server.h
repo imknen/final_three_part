@@ -10,22 +10,33 @@
 #include <deque>
 using namespace std;
 
+class IdDocCountWord {
+public:
+	IdDocCountWord() : quantity_word(50'000, 0) {}
+
+	auto& operator [] (const size_t& position) {
+		return quantity_word[position];
+	}
+private:
+	vector<size_t> quantity_word;
+};
+
 class InvertedIndex {
 public:
 	
 	InvertedIndex() {docs.reserve(50'000);}
 
   void Add(const string&& document);
-  const deque<size_t>& Lookup(const string& word) const;
+  const IdDocCountWord& Lookup(const string& word) const;
 
   const string& GetDocument(size_t id) const {
     return docs[id];
   }
 
 private:
-  map<string, deque<size_t>> index;
+  map<string, IdDocCountWord> index;
   vector<string> docs;
-	deque<size_t> tempor;
+	 IdDocCountWord tempor;
 };
 
 class SearchServer {
