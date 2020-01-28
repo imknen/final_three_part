@@ -13,8 +13,12 @@ using namespace std;
 class IdDocCountWord {
 public:
 	IdDocCountWord() : quantity_word(50'000, 0) {}
+	IdDocCountWord(const size_t& size) : quantity_word(size, 0) {}
 
-	auto& operator [] (const size_t& position) {
+	size_t& operator [] (const size_t& position) {
+		return quantity_word[position];
+	}
+	const size_t& operator [] (const size_t& position) const {
 		return quantity_word[position];
 	}
 private:
@@ -24,7 +28,7 @@ private:
 class InvertedIndex {
 public:
 	
-	InvertedIndex() {docs.reserve(50'000);}
+	InvertedIndex() : tempor(0) {docs.reserve(50'000);}
 
   void Add(const string&& document);
   const IdDocCountWord& Lookup(const string& word) const;
@@ -36,7 +40,7 @@ public:
 private:
   map<string, IdDocCountWord> index;
   vector<string> docs;
-	 IdDocCountWord tempor;
+	IdDocCountWord tempor;
 };
 
 class SearchServer {
