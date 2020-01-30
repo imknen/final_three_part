@@ -21,6 +21,9 @@ public:
 	const size_t& operator [] (const size_t& position) const {
 		return quantity_word[position];
 	}
+
+	bool Isempty() const {return quantity_word.empty();}
+
 private:
 	vector<size_t> quantity_word;
 };
