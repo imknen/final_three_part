@@ -51,12 +51,12 @@ void SearchServer::AddQueriesStream(
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
-    /*for (const auto& word : words) {
+    for (const auto& word : words) {
       for (const size_t docid : index.Lookup(word)) {
         docid_count[docid]++;
       }
     }
-		*/
+		/*
 		for (const auto & word : words) {
 		 const auto & index_list  = index.Lookup(word);
 		 if (index_list.Isempty()) {continue;}
@@ -64,6 +64,7 @@ void SearchServer::AddQueriesStream(
 		 	docid_count[i] += index_list[i];
 		 }
 		}
+		*/
 
 		}
 
@@ -111,11 +112,11 @@ void InvertedIndex::Add(const string&& document) {
 
   const size_t docid = docs.size() - 1;
   for (auto&& word : SplitIntoWords(move(document))) {
-    index[move(word)][docid]++;
+    index[move(word)].push_back(docid);
   }
 }
 
-const IdDocCountWord& InvertedIndex::Lookup(const string& word) const {
+const vector<size_t>& InvertedIndex::Lookup(const string& word) const {
   if (auto it = index.find(word); it != index.end()) {
     return it->second;
   } else {
