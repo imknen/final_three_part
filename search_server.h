@@ -13,9 +13,9 @@ using namespace std;
 class InvertedIndex {
 public:
 
-	InvertedIndex() {docs.reserve(50'000);}
+//	InvertedIndex() {docs.reserve(50'000);}
 
-  void Add(const string&& document);
+  void Add(string document);
   const vector<size_t>& Lookup(const string& word) const;
 
   const string& GetDocument(size_t id) const {

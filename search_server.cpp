@@ -32,10 +32,6 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
 //  index = move(new_index);
 }
 
-auto SplitIntoWordsDura (string& s, TotalDuration& t) {
-	ADD_DURATION(t);
-	return SplitIntoWords(move(s));
-}
 void SearchServer::AddQueriesStream(
   istream& query_input, ostream& search_results_output
 ) {
@@ -52,19 +48,10 @@ void SearchServer::AddQueriesStream(
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
     for (const auto& word : words) {
-      for (const size_t docid : index.Lookup(word)) {
+      for (const size_t& docid : index.Lookup(word)) {
         docid_count[docid]++;
       }
     }
-		/*
-		for (const auto & word : words) {
-		 const auto & index_list  = index.Lookup(word);
-		 if (index_list.Isempty()) {continue;}
-		 for (size_t i = 0;i < 50'000; i++) {
-		 	docid_count[i] += index_list[i];
-		 }
-		}
-		*/
 
 		}
 
@@ -107,7 +94,7 @@ void SearchServer::AddQueriesStream(
   }
 }
 
-void InvertedIndex::Add(const string&& document) {
+void InvertedIndex::Add(string document) {
   docs.push_back(document);
 
   const size_t docid = docs.size() - 1;
