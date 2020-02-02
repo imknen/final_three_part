@@ -1,4 +1,4 @@
-.PHONY: all clean 
+.PHONY: clean 
 
 CFLAGS= -Wall -std=c++1z -g3
 
