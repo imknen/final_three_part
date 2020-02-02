@@ -17,7 +17,7 @@ public:
 //	InvertedIndex() {docs.reserve(50'000);}
 
   void Add(string document);
-  const vector<size_t>& Lookup(const string_view& word) const;
+  const vector<size_t>& Lookup(const string_view word) const;
 
   const string& GetDocument(size_t id) const {
     return docs[id];
