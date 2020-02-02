@@ -6,8 +6,8 @@
 #include <iterator>
 #include <sstream>
 #include <iostream>
-
-
+#include <string_view>
+/*
 vector<string> SplitIntoWords(const string&& line) {
   istringstream words_input(move(line));
  // return {istream_iterator<string>(words_input), istream_iterator<string>()};
@@ -16,6 +16,36 @@ vector<string> SplitIntoWords(const string&& line) {
  	ret.push_back(move(s));
  }
  return ret;
+}
+*/
+std::vector<std::string_view> SplitIntoWords(const std::string& line) {
+	std::string_view str = line;
+	std::vector<std::string_view> res;
+	size_t not_space = str.find_first_not_of(' ');
+	if (not_space != str.npos) {
+		str.remove_prefix(not_space);
+	}
+	else {
+		return {};
+	}
+	while (true) {
+		size_t space = str.find(' ');
+		res.push_back(str.substr(0, space));
+		if (space == str.npos) {
+			break;
+		}
+		else {
+			str.remove_prefix(space + 1);
+			size_t not_space = str.find_first_not_of(' ');
+			if (not_space != str.npos) {
+				str.remove_prefix(not_space);
+			}
+			else {
+				break;
+			}
+		}
+	}
+	return res;
 }
 
 SearchServer::SearchServer(istream& document_input) {
@@ -43,7 +73,7 @@ void SearchServer::AddQueriesStream(
 	TotalDuration fill_vec_pair("Total fill vect_pair");
 
   for (string current_query; getline(query_input, current_query); ) {
-    const auto words = SplitIntoWords(move(current_query));
+    const auto words = SplitIntoWords(current_query);
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
@@ -95,28 +125,20 @@ void SearchServer::AddQueriesStream(
 }
 
 void InvertedIndex::Add(string document) {
-  docs.push_back(document);
+  docs.push_back(move(document));
 
   const size_t docid = docs.size() - 1;
-  for (auto&& word : SplitIntoWords(move(document))) {
+	auto& doc = docs.back();
+  for (auto&& word : SplitIntoWords(doc)) {
     index[move(word)].push_back(docid);
   }
 }
 
-const vector<size_t>& InvertedIndex::Lookup(const string& word) const {
+const vector<size_t>& InvertedIndex::Lookup(const std::string_view& word) const {
   if (auto it = index.find(word); it != index.end()) {
     return it->second;
   } else {
     return tempor; 
   }
 	
-//	return index[word]
-//ние
-//￼	
-//￼
-//Разделы О проекте
-//﻿
-//C++ для начинающих
-//Липпман Стенли
-//Ал}
 }
