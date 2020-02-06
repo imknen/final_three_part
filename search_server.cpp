@@ -8,16 +8,6 @@
 #include <iostream>
 
 
-vector<string> SplitIntoWords(const string&& line) {
-  istringstream words_input(move(line));
- // return {istream_iterator<string>(words_input), istream_iterator<string>()};
- vector<string> ret;
- for (string s; words_input >> s;) {
- 	ret.push_back(move(s));
- }
- return ret;
-}
-
 SearchServer::SearchServer(istream& document_input) {
   UpdateDocumentBase(document_input);
 }
@@ -28,13 +18,14 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
   for (string current_document; getline(document_input, current_document); ) {
     index.Add(move(current_document));
   }
-
+	sort(index.begin(), index.end(), comparator);
 //  index = move(new_index);
 }
 
 void SearchServer::AddQueriesStream(
   istream& query_input, ostream& search_results_output
 ) {
+
 	TotalDuration read("Total read");
 	TotalDuration split("Total split");
 	TotalDuration lookup("Total lookup");
@@ -43,8 +34,20 @@ void SearchServer::AddQueriesStream(
 	TotalDuration fill_vec_pair("Total fill vect_pair");
 
   for (string current_query; getline(query_input, current_query); ) {
-    const auto words = SplitIntoWords(move(current_query));
+    const auto words = SplitBy(Strip(current_query), ' ');
 
+    vector<size_t> docid_count(50'000, 0);
+		{ADD_DURATION(lookup);
+    for (const auto& word : words) {
+      for (const size_t& docid : index.Lookup(word)) {
+        docid_count[docid]++;
+      }
+    }
+
+		}
+		
+	}
+	/*
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
     for (const auto& word : words) {
@@ -92,15 +95,19 @@ void SearchServer::AddQueriesStream(
     search_results_output << '\n';
 		}
   }
+	*/
 }
 
 void InvertedIndex::Add(string document) {
-  docs.push_back(document);
-
-  const size_t docid = docs.size() - 1;
-  for (auto&& word : SplitIntoWords(move(document))) {
-    index[move(word)].push_back(docid);
-  }
+  docs.push_back(move(document));
+	const size_t docid = docs.size() - 1;
+	string_view sv_doc = docs.back();
+	while (!sv_doc.empty()) {
+		size_t pos = s.find(' ');
+		index.push_back({sv_doc.substr(0, pos), docid});
+		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1 : sv.size());
+	}
+	
 }
 
 const vector<size_t>& InvertedIndex::Lookup(const string& word) const {
@@ -110,14 +117,5 @@ const vector<size_t>& InvertedIndex::Lookup(const string& word) const {
     return tempor; 
   }
 	
-//	return index[word]
-//ние
-//￼	
-//￼
-//Разделы О проекте
-//﻿
-//C++ для начинающих
-//Липпман Стенли
-//Ал}
 }
 

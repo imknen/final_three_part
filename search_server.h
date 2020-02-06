@@ -9,24 +9,29 @@
 #include <string>
 #include <deque>
 #include <string_view>
+#include <utility>
 using namespace std;
 
 class InvertedIndex {
 public:
 
-//	InvertedIndex() {docs.reserve(50'000);}
-
   void Add(string document);
-  const vector<size_t>& Lookup(const string& word) const;
+  const vector<size_t>& Lookup(string word) const;
 
   const string& GetDocument(size_t id) const {
     return docs[id];
   }
 
 private:
-  map<string, vector<size_t>> index;
+  vector<pair<string_view, size_t>> index;
   vector<string> docs;
-	vector<size_t> tempor;
+//	vector<size_t> tempor;
+
+	struct Comp {
+		bool operator() (pair<string_view, size_t>& rhs, pair<string_view, size_t>& lhs) {
+			return rhs.first < lhs.first;
+		}
+	}comparator;
 };
 
 class SearchServer {
