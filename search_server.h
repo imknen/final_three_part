@@ -16,22 +16,18 @@ class InvertedIndex {
 public:
 
   void Add(string document);
-  const vector<size_t>& Lookup(string word) const;
+//  const vector<size_t>& Lookup(string word) const;
 
   const string& GetDocument(size_t id) const {
     return docs[id];
   }
 
+	const auto begin() const {return index.begin();}
+	const auto end() const {return index.end();}
 private:
   vector<pair<string_view, size_t>> index;
   vector<string> docs;
-//	vector<size_t> tempor;
 
-	struct Comp {
-		bool operator() (pair<string_view, size_t>& rhs, pair<string_view, size_t>& lhs) {
-			return rhs.first < lhs.first;
-		}
-	}comparator;
 };
 
 class SearchServer {

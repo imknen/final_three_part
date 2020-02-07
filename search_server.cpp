@@ -18,10 +18,21 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
   for (string current_document; getline(document_input, current_document); ) {
     index.Add(move(current_document));
   }
-	sort(index.begin(), index.end(), comparator);
+//	sort(index.begin(), index.end(), comparator);
 //  index = move(new_index);
 }
 
+	const map<string_view, size_t> Split(string_view s)
+	{
+		map<string_view, size_t> ret;
+
+		while (!s.empty()) {
+    size_t pos = s.find(' ');
+    ret[s.substr(0, pos)]++;
+    s.remove_prefix(pos != s.npos ? pos + 1 : s.size());
+  }
+		return ret;
+	}
 void SearchServer::AddQueriesStream(
   istream& query_input, ostream& search_results_output
 ) {
@@ -33,30 +44,19 @@ void SearchServer::AddQueriesStream(
 	TotalDuration form_res("Forming result");
 	TotalDuration fill_vec_pair("Total fill vect_pair");
 
+
   for (string current_query; getline(query_input, current_query); ) {
-    const auto words = SplitBy(Strip(current_query), ' ');
+    const auto words = Split(current_query);
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
-    for (const auto& word : words) {
-      for (const size_t& docid : index.Lookup(word)) {
-        docid_count[docid]++;
-      }
+    for (const auto v : index) {
+			if (words.count(v.first))
+        docid_count[v.second]+=words.at(v.first);
     }
 
 		}
 		
-	}
-	/*
-    vector<size_t> docid_count(50'000, 0);
-		{ADD_DURATION(lookup);
-    for (const auto& word : words) {
-      for (const size_t& docid : index.Lookup(word)) {
-        docid_count[docid]++;
-      }
-    }
-
-		}
 
     vector<pair<size_t, size_t>> search_results;
 		search_results.reserve(55'005);
@@ -95,7 +95,6 @@ void SearchServer::AddQueriesStream(
     search_results_output << '\n';
 		}
   }
-	*/
 }
 
 void InvertedIndex::Add(string document) {
@@ -103,13 +102,13 @@ void InvertedIndex::Add(string document) {
 	const size_t docid = docs.size() - 1;
 	string_view sv_doc = docs.back();
 	while (!sv_doc.empty()) {
-		size_t pos = s.find(' ');
+		size_t pos = sv_doc.find(' ');
 		index.push_back({sv_doc.substr(0, pos), docid});
-		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1 : sv.size());
+		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1 : sv_doc.size());
 	}
 	
 }
-
+/*
 const vector<size_t>& InvertedIndex::Lookup(const string& word) const {
   if (auto it = index.find(word); it != index.end()) {
     return it->second;
@@ -118,4 +117,4 @@ const vector<size_t>& InvertedIndex::Lookup(const string& word) const {
   }
 	
 }
-
+*/
