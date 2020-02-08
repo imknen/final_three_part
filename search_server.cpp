@@ -22,15 +22,22 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
 //  index = move(new_index);
 }
 
-	const map<string_view, size_t> Split(string_view s)
+	const deque<string_view> SplitToMap(string_view s)
 	{
-		map<string_view, size_t> ret;
+		deque<string_view> ret;
 
-		while (!s.empty()) {
-    size_t pos = s.find(' ');
-    ret[s.substr(0, pos)]++;
-    s.remove_prefix(pos != s.npos ? pos + 1 : s.size());
-  }
+	size_t pos = s.find_first_not_of(' ');
+		if (pos != s.npos) {
+			s.remove_prefix(pos);
+		}	else { return {}; }
+	while (!s.empty()) {
+		pos = s.find(' ');
+    ret.push_back(s.substr(0, pos));
+		s.remove_prefix(pos != s.npos ? pos +1: s.size());
+		while (!s.empty() && isspace(s.front())) {
+			s.remove_prefix(1);
+		}
+	}
 		return ret;
 	}
 void SearchServer::AddQueriesStream(
@@ -46,13 +53,15 @@ void SearchServer::AddQueriesStream(
 
 
   for (string current_query; getline(query_input, current_query); ) {
-    const auto words = Split(current_query);
+    const auto words(SplitToMap(current_query));
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
     for (const auto v : index) {
-			if (words.count(v.first))
-        docid_count[v.second]+=words.at(v.first);
+			for (auto s : words) {
+			 if (v.first == s)
+        docid_count[v.second]++;
+			} 
     }
 
 		}
@@ -94,6 +103,7 @@ void SearchServer::AddQueriesStream(
     }
     search_results_output << '\n';
 		}
+
   }
 }
 
@@ -101,11 +111,19 @@ void InvertedIndex::Add(string document) {
   docs.push_back(move(document));
 	const size_t docid = docs.size() - 1;
 	string_view sv_doc = docs.back();
-	while (!sv_doc.empty()) {
-		size_t pos = sv_doc.find(' ');
-		index.push_back({sv_doc.substr(0, pos), docid});
-		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1 : sv_doc.size());
-	}
 	
+	size_t pos = sv_doc.find_first_not_of(' ');
+		if (pos != sv_doc.npos) {
+			sv_doc.remove_prefix(pos);
+		} else {return;}
+
+	while (!sv_doc.empty()) {
+		pos = sv_doc.find(' ');
+		index.push_back({sv_doc.substr(0, pos), docid});
+		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1: sv_doc.size());
+		while (!sv_doc.empty() && isspace(sv_doc.front())) {
+			sv_doc.remove_prefix(1);
+		}
+	}
 }
 
