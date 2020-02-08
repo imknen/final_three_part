@@ -1,6 +1,6 @@
 .PHONY: clean 
 
-CFLAGS= -Wall -std=c++1z -O3
+CFLAGS= -Wall -std=c++1z -g3
 
 all: main.o parse.o search_server.o 
 	g++ -o test $(CFLAGS) $^

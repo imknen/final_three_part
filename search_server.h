@@ -16,7 +16,6 @@ class InvertedIndex {
 public:
 
   void Add(string document);
-//  const vector<size_t>& Lookup(string word) const;
 
   const string& GetDocument(size_t id) const {
     return docs[id];
@@ -27,7 +26,6 @@ public:
 private:
   vector<pair<string_view, size_t>> index;
   vector<string> docs;
-
 };
 
 class SearchServer {
