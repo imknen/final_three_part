@@ -24,8 +24,8 @@ public:
 	const auto begin() const {return index.begin();}
 	const auto end() const {return index.end();}
 private:
-  vector<pair<string_view, size_t>> index;
-  vector<string> docs;
+  deque<pair<string_view, size_t>> index;
+  deque<string> docs;
 };
 
 class SearchServer {
