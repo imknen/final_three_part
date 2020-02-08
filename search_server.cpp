@@ -18,13 +18,12 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
   for (string current_document; getline(document_input, current_document); ) {
     index.Add(move(current_document));
   }
-//	sort(index.begin(), index.end(), comparator);
 //  index = move(new_index);
 }
 
-	const deque<string_view> SplitToMap(string_view s)
+	const map<string_view, size_t> SplitToMap(string_view s)
 	{
-		deque<string_view> ret;
+		map<string_view, size_t> ret;
 
 	size_t pos = s.find_first_not_of(' ');
 		if (pos != s.npos) {
@@ -32,7 +31,7 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
 		}	else { return {}; }
 	while (!s.empty()) {
 		pos = s.find(' ');
-    ret.push_back(s.substr(0, pos));
+    ret[s.substr(0, pos)]++;
 		s.remove_prefix(pos != s.npos ? pos +1: s.size());
 		while (!s.empty() && isspace(s.front())) {
 			s.remove_prefix(1);
@@ -58,10 +57,9 @@ void SearchServer::AddQueriesStream(
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
     for (const auto v : index) {
-			for (auto s : words) {
-			 if (v.first == s)
-        docid_count[v.second]++;
-			} 
+			try {
+        docid_count[v.second]+=words.at(v.first);
+			} catch (exception & e) {}
     }
 
 		}
@@ -103,7 +101,6 @@ void SearchServer::AddQueriesStream(
     }
     search_results_output << '\n';
 		}
-
   }
 }
 
