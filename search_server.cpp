@@ -6,7 +6,7 @@
 #include <iterator>
 #include <sstream>
 #include <iostream>
-
+#include <unordered_map>
 
 SearchServer::SearchServer(istream& document_input) {
   UpdateDocumentBase(document_input);
@@ -21,9 +21,9 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
 //  index = move(new_index);
 }
 
-	const map<string_view, size_t> SplitToMap(string_view s)
+	const unordered_map<string_view, size_t> SplitToMap(string_view s)
 	{
-		map<string_view, size_t> ret;
+		unordered_map<string_view, size_t> ret;
 
 	size_t pos = s.find_first_not_of(' ');
 		if (pos != s.npos) {
