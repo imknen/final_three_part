@@ -50,24 +50,24 @@ void SearchServer::AddQueriesStream(
 	TotalDuration form_res("Forming result");
 	TotalDuration fill_vec_pair("Total fill vect_pair");
 
+vector<pair<size_t, size_t>> search_results;
+		search_results.reserve(55'005);
 
   for (string current_query; getline(query_input, current_query); ) {
     const auto words(SplitToMap(current_query));
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
-    for (const auto v : index) {
-			try {
-        docid_count[v.second]+=words.at(v.first);
-			} catch (exception & e) {}
+    for (const auto& word : words) {
+			for (const size_t& docid : index.Lookup(word.first)) {
+        docid_count[docid]+= word.second;
+      }
     }
 
 		}
 		
 
-    vector<pair<size_t, size_t>> search_results;
-		search_results.reserve(55'005);
-		{
+    		{
 		ADD_DURATION(fill_vec_pair);
 		for (size_t i = 0;i < 50'000; i++) {
 			if (docid_count[i] > 0) {
@@ -99,8 +99,10 @@ void SearchServer::AddQueriesStream(
         << "docid: " << docid << ", "
         << "hitcount: " << hitcount << '}';
     }
-    search_results_output << '\n';
+    search_results_output << endl;
 		}
+	
+		search_results.clear();
   }
 }
 
@@ -116,11 +118,19 @@ void InvertedIndex::Add(string document) {
 
 	while (!sv_doc.empty()) {
 		pos = sv_doc.find(' ');
-		index.push_back({sv_doc.substr(0, pos), docid});
+		index[sv_doc.substr(0, pos)].push_back(docid);
 		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1: sv_doc.size());
 		while (!sv_doc.empty() && isspace(sv_doc.front())) {
 			sv_doc.remove_prefix(1);
 		}
 	}
+}
+const vector<size_t>& InvertedIndex::Lookup(const std::string_view& word) const {
+  if (auto it = index.find(word); it != index.end()) {
+    return it->second;
+  } else {
+    return tempor; 
+  }
+	
 }
 
