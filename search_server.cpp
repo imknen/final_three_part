@@ -54,13 +54,13 @@ vector<pair<size_t, size_t>> search_results;
 		search_results.reserve(55'005);
 
   for (string current_query; getline(query_input, current_query); ) {
-    const auto words(SplitToMap(current_query));
+    const auto words_query(SplitToMap(current_query));
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
-    for (const auto& word : words) {
+    for (const auto& word : words_query) {
 			for (const size_t& docid : index.Lookup(word.first)) {
-        docid_count[docid]+= word.second;
+        docid_count[docid]+=word.second;
       }
     }
 
@@ -106,24 +106,30 @@ vector<pair<size_t, size_t>> search_results;
   }
 }
 
-void InvertedIndex::Add(string document) {
-  docs.push_back(move(document));
-	const size_t docid = docs.size() - 1;
-	string_view sv_doc = docs.back();
-	
-	size_t pos = sv_doc.find_first_not_of(' ');
-		if (pos != sv_doc.npos) {
-			sv_doc.remove_prefix(pos);
+void InvertedIndex::Add(string_view document) {
+	deque<string_view> list_words;
+	const size_t docid = docs.size();
+
+size_t pos = document.find_first_not_of(' ');
+		if (pos != document.npos) {
+			document.remove_prefix(pos);
 		} else {return;}
 
-	while (!sv_doc.empty()) {
-		pos = sv_doc.find(' ');
-		index[sv_doc.substr(0, pos)].push_back(docid);
-		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1: sv_doc.size());
-		while (!sv_doc.empty() && isspace(sv_doc.front())) {
-			sv_doc.remove_prefix(1);
+	while (!document.empty()) {
+		pos = document.find(' ');
+		if (!index.count(document.substr(0, pos))) {
+			words.push_back(static_cast<string>(document.substr(0, pos)));
+			index[words.back()].push_back(docid);
+		} else {
+			index[document.substr(0, pos)].push_back(docid);
+		}
+		list_words.push_back(words.back());
+		document.remove_prefix(pos != document.npos ? pos +1: document.size());
+		while (!document.empty() && isspace(document.front())) {
+			document.remove_prefix(1);
 		}
 	}
+	docs.push_back(move(list_words));
 }
 const vector<size_t>& InvertedIndex::Lookup(const std::string_view& word) const {
   if (auto it = index.find(word); it != index.end()) {

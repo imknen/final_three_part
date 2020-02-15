@@ -62,20 +62,22 @@ struct Elem {
 class InvertedIndex {
 public:
 	
-	InvertedIndex () 
-	{docs.reserve(50'000); }
-
-  void Add(string document);
+  void Add(string_view document);
 	const vector<size_t>& Lookup(const string_view& word) const;
-  const string& GetDocument(size_t id) const {
-    return docs[id];
+  const string GetDocument(size_t id) const {
+    string ret;
+		for (const auto w : docs[id]) {
+			ret += w;
+		}
+		return ret;
   }
 
 	const auto begin() const {return index.begin();}
 	const auto end() const {return index.end();}
 private:
   unordered_map<string_view, vector<size_t>> index;
-  vector<string> docs;
+  deque<string> words;
+	deque<deque<string_view>> docs;
 	vector<size_t> tempor;
 };
 
