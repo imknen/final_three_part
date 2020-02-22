@@ -16,9 +16,10 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
   //InvertedIndex new_index;
 
   for (string current_document; getline(document_input, current_document); ) {
-    index.Add(move(current_document));
+    index.Add(current_document);
   }
 //  index = move(new_index);
+
 }
 
 	const unordered_map<string_view, size_t> SplitToMap(string_view s)
@@ -50,24 +51,24 @@ void SearchServer::AddQueriesStream(
 	TotalDuration form_res("Forming result");
 	TotalDuration fill_vec_pair("Total fill vect_pair");
 
-vector<pair<size_t, size_t>> search_results;
-		search_results.reserve(55'005);
 
   for (string current_query; getline(query_input, current_query); ) {
-    const auto words_query(SplitToMap(current_query));
+    const auto words(SplitToMap(current_query));
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
-    for (const auto& word : words_query) {
-			for (const size_t& docid : index.Lookup(word.first)) {
-        docid_count[docid]+=word.second;
-      }
+    for (const auto v : index) {
+			try {
+        	docid_count[v.second]+=words.at(v.first);
+			} catch (exception & e) {}
     }
 
 		}
 		
 
-    		{
+    vector<pair<size_t, size_t>> search_results;
+		search_results.reserve(55'005);
+		{
 		ADD_DURATION(fill_vec_pair);
 		for (size_t i = 0;i < 50'000; i++) {
 			if (docid_count[i] > 0) {
@@ -99,44 +100,29 @@ vector<pair<size_t, size_t>> search_results;
         << "docid: " << docid << ", "
         << "hitcount: " << hitcount << '}';
     }
-    search_results_output << endl;
+    search_results_output << '\n';
 		}
-	
-		search_results.clear();
   }
 }
 
-void InvertedIndex::Add(string_view document) {
-	deque<string_view> list_words;
-	const size_t docid = docs.size();
-
-size_t pos = document.find_first_not_of(' ');
-		if (pos != document.npos) {
-			document.remove_prefix(pos);
+void InvertedIndex::Add(const string& document) {
+  docs.push_back(document);
+	const size_t docid = docs.size() - 1;
+	string_view sv_doc = docs.back();
+	
+	size_t pos = sv_doc.find_first_not_of(' ');
+		if (pos != sv_doc.npos) {
+			sv_doc.remove_prefix(pos);
 		} else {return;}
 
-	while (!document.empty()) {
-		pos = document.find(' ');
-		if (!index.count(document.substr(0, pos))) {
-			words.push_back(static_cast<string>(document.substr(0, pos)));
-			index[words.back()].push_back(docid);
-		} else {
-			index[document.substr(0, pos)].push_back(docid);
-		}
-		list_words.push_back(words.back());
-		document.remove_prefix(pos != document.npos ? pos +1: document.size());
-		while (!document.empty() && isspace(document.front())) {
-			document.remove_prefix(1);
+	while (!sv_doc.empty()) {
+		pos = sv_doc.find(' ');
+		index.push_back({sv_doc.substr(0, pos), docid});
+		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1: sv_doc.size());
+		while (!sv_doc.empty() && isspace(sv_doc.front())) {
+			sv_doc.remove_prefix(1);
 		}
 	}
-	docs.push_back(move(list_words));
 }
-const vector<size_t>& InvertedIndex::Lookup(const std::string_view& word) const {
-  if (auto it = index.find(word); it != index.end()) {
-    return it->second;
-  } else {
-    return tempor; 
-  }
-	
-}
+
 

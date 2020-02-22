@@ -10,11 +10,10 @@
 #include <deque>
 #include <string_view>
 #include <utility>
+#include <algorithm>
+#include <unordered_set>
 #include <array>
-#include <stdexcept>
-#include <unordered_map>
 using namespace std;
-
 
 template<typename T, size_t N>
 class SpeedCont {
@@ -54,31 +53,20 @@ private:
 
 };
 
-struct Elem {
-	string_view s;
-	int64_t num_doc;
-};
-
 class InvertedIndex {
 public:
-	
-  void Add(string_view document);
-	const vector<size_t>& Lookup(const string_view& word) const;
-  const string GetDocument(size_t id) const {
-    string ret;
-		for (const auto w : docs[id]) {
-			ret += w;
-		}
-		return ret;
+
+  void Add(const string& document);
+
+  const string& GetDocument(size_t id) const {
+    return docs[id];
   }
 
 	const auto begin() const {return index.begin();}
 	const auto end() const {return index.end();}
 private:
-  unordered_map<string_view, vector<size_t>> index;
-  deque<string> words;
-	deque<deque<string_view>> docs;
-	vector<size_t> tempor;
+  deque<pair<string_view, size_t>> index;
+  SpeedCont<string, 50'000> docs;
 };
 
 class SearchServer {
@@ -91,4 +79,5 @@ public:
 private:
   InvertedIndex index;
 };
+
 
