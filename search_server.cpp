@@ -7,24 +7,27 @@
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
-
+#include <functional>
 SearchServer::SearchServer(istream& document_input) {
   UpdateDocumentBase(document_input);
 }
 
 void SearchServer::UpdateDocumentBase(istream& document_input) {
   //InvertedIndex new_index;
-
+LOG_DURATION("add Documents")
+{
+TotalDuration function_add("function_add_time ");
   for (string current_document; getline(document_input, current_document); ) {
-    index.Add(current_document);
+		ADD_DURATION(function_add);
+    index.Add(move(current_document));
   }
 //  index = move(new_index);
-
+}
 }
 
-	const unordered_map<string_view, size_t> SplitToMap(string_view s)
+	const deque<string_view> SplitToMap(string_view s)
 	{
-		unordered_map<string_view, size_t> ret;
+		deque<string_view> ret;
 
 	size_t pos = s.find_first_not_of(' ');
 		if (pos != s.npos) {
@@ -32,7 +35,7 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
 		}	else { return {}; }
 	while (!s.empty()) {
 		pos = s.find(' ');
-    ret[s.substr(0, pos)]++;
+    ret.push_back(s.substr(0, pos));
 		s.remove_prefix(pos != s.npos ? pos +1: s.size());
 		while (!s.empty() && isspace(s.front())) {
 			s.remove_prefix(1);
@@ -57,12 +60,19 @@ void SearchServer::AddQueriesStream(
 
     vector<size_t> docid_count(50'000, 0);
 		{ADD_DURATION(lookup);
+		/*
     for (const auto v : index) {
 			try {
         	docid_count[v.second]+=words.at(v.first);
 			} catch (exception & e) {}
     }
+*/
 
+		for (const auto& word : words) {
+      for (const size_t docid : index.Lookup(word)) {
+        docid_count[docid]++;
+      }
+    }
 		}
 		
 
@@ -105,8 +115,8 @@ void SearchServer::AddQueriesStream(
   }
 }
 
-void InvertedIndex::Add(const string& document) {
-  docs.push_back(document);
+void InvertedIndex::Add(string document) {
+  docs.push_back(move(document));
 	const size_t docid = docs.size() - 1;
 	string_view sv_doc = docs.back();
 	
@@ -117,7 +127,7 @@ void InvertedIndex::Add(const string& document) {
 
 	while (!sv_doc.empty()) {
 		pos = sv_doc.find(' ');
-		index.push_back({sv_doc.substr(0, pos), docid});
+		index[hash<string_view>{}(sv_doc.substr(0, pos))%100'000].push_back(docid);
 		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1: sv_doc.size());
 		while (!sv_doc.empty() && isspace(sv_doc.front())) {
 			sv_doc.remove_prefix(1);
@@ -125,4 +135,13 @@ void InvertedIndex::Add(const string& document) {
 	}
 }
 
+vector<size_t> InvertedIndex::Lookup(const string_view word) const {
+ /* if (auto it = index.find(word); it != index.end()) {
+    return it->second;
+  } else {
+    return empty_vec;
+  }
+	*/
+	return index[(hash<string_view>{}(word))%100'000];
+}
 
