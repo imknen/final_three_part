@@ -36,7 +36,7 @@ public:
 	const auto end() const {return index.end();}
 
 private:
-  unordered_map<string_view, vector<size_t>> index;
+  map<string_view, vector<size_t>> index;
 	
 	//deque<pair<string_view, size_t>> index;
   vector<string> docs;
