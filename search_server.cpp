@@ -127,7 +127,7 @@ void InvertedIndex::Add(string document) {
 
 	while (!sv_doc.empty()) {
 		pos = sv_doc.find(' ');
-		index[hash<string_view>{}(sv_doc.substr(0, pos))%100'000].push_back(docid);
+		index[(sv_doc.substr(0, pos))].push_back(docid);
 		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1: sv_doc.size());
 		while (!sv_doc.empty() && isspace(sv_doc.front())) {
 			sv_doc.remove_prefix(1);
@@ -136,12 +136,12 @@ void InvertedIndex::Add(string document) {
 }
 
 vector<size_t> InvertedIndex::Lookup(const string_view word) const {
- /* if (auto it = index.find(word); it != index.end()) {
+  if (auto it = index.find(word); it != index.end()) {
     return it->second;
   } else {
     return empty_vec;
   }
-	*/
-	return index[(hash<string_view>{}(word))%100'000];
+	
+//	return index[(hash<string_view>{}(word))%10'000'000];
 }
 

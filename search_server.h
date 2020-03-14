@@ -21,7 +21,7 @@ using namespace std;
 class InvertedIndex {
 public:
 
-	InvertedIndex(): index(100'000, vector<size_t>(0)){LOG_DURATION("time reserved"){docs.reserve(50'000);
+	InvertedIndex() {LOG_DURATION("time reserved"){docs.reserve(50'000);
 	}
 		
 	}
@@ -36,7 +36,7 @@ public:
 	const auto end() const {return index.end();}
 
 private:
-  vector<vector<size_t>> index;
+  unordered_map<string_view, vector<size_t>> index;
 	
 	//deque<pair<string_view, size_t>> index;
   vector<string> docs;
