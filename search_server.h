@@ -21,13 +21,13 @@ using namespace std;
 class InvertedIndex {
 public:
 
-	InvertedIndex() {LOG_DURATION("time reserved"){docs.reserve(50'000);
+	InvertedIndex() : index(10'000,map<size_t, vector<size_t>>()){LOG_DURATION("time reserved"){docs.reserve(50'000);
 	}
 		
 	}
 
   void Add(string document);
-	vector<size_t> Lookup(const string_view word) const;
+	const vector<size_t>& Lookup(size_t) const;
   const string& GetDocument(size_t id) const {
     return docs[id];
   }
@@ -36,7 +36,7 @@ public:
 	const auto end() const {return index.end();}
 
 private:
-  map<string_view, vector<size_t>> index;
+  vector<map<size_t, vector<size_t>>> index;
 	
 	//deque<pair<string_view, size_t>> index;
   vector<string> docs;

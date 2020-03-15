@@ -25,9 +25,9 @@ TotalDuration function_add("function_add_time ");
 }
 }
 
-	const deque<string_view> SplitToMap(string_view s)
+	const unordered_map<size_t,size_t> SplitToMap(string_view s)
 	{
-		deque<string_view> ret;
+		unordered_map<size_t,size_t> ret;
 
 	size_t pos = s.find_first_not_of(' ');
 		if (pos != s.npos) {
@@ -35,7 +35,7 @@ TotalDuration function_add("function_add_time ");
 		}	else { return {}; }
 	while (!s.empty()) {
 		pos = s.find(' ');
-    ret.push_back(s.substr(0, pos));
+    ret[hash<string_view>{}(s.substr(0, pos))]++;
 		s.remove_prefix(pos != s.npos ? pos +1: s.size());
 		while (!s.empty() && isspace(s.front())) {
 			s.remove_prefix(1);
@@ -55,29 +55,27 @@ void SearchServer::AddQueriesStream(
 	TotalDuration fill_vec_pair("Total fill vect_pair");
 
 
+	map<string, vector<size_t>> query_hash;
+
+
   for (string current_query; getline(query_input, current_query); ) {
+    vector<size_t> docid_count(50'000, 0);
+	 if (query_hash.count(current_query)) {docid_count = query_hash[current_query];} else {
     const auto words(SplitToMap(current_query));
 
-    vector<size_t> docid_count(50'000, 0);
+
 		{ADD_DURATION(lookup);
-		/*
-    for (const auto v : index) {
-			try {
-        	docid_count[v.second]+=words.at(v.first);
-			} catch (exception & e) {}
-    }
-*/
 
 		for (const auto& word : words) {
-      for (const size_t docid : index.Lookup(word)) {
-        docid_count[docid]++;
+      for (const size_t docid : index.Lookup(word.first)) {
+        docid_count[docid]+=word.second;
       }
     }
 		}
 		
-
+		}
     vector<pair<size_t, size_t>> search_results;
-		search_results.reserve(55'005);
+		search_results.reserve(50'000);
 		{
 		ADD_DURATION(fill_vec_pair);
 		for (size_t i = 0;i < 50'000; i++) {
@@ -93,12 +91,8 @@ void SearchServer::AddQueriesStream(
 							search_results.begin(),
 							search_results.begin() + min<size_t>(search_results.size(), 5),
 							search_results.end(),
-							[](const pair<size_t, size_t>& lhs,const pair<size_t, size_t>& rhs) {
-								int64_t lhs_docid = lhs.first;
-								auto lhs_hit_count = lhs.second;
-								int64_t rhs_docid = rhs.first;
-								auto rhs_hit_count = rhs.second;
-								return make_pair(lhs_hit_count, -lhs_docid) > make_pair(rhs_hit_count, -rhs_docid);
+							[](pair<size_t, size_t>& lhs, pair<size_t, size_t>& rhs) {
+								return make_pair(lhs.second, -static_cast<int64_t>(lhs.first)) > make_pair(rhs.second, -static_cast<int64_t>(rhs.first));
 							}
 						);
 		}
@@ -125,9 +119,12 @@ void InvertedIndex::Add(string document) {
 			sv_doc.remove_prefix(pos);
 		} else {return;}
 
+	
+
 	while (!sv_doc.empty()) {
 		pos = sv_doc.find(' ');
-		index[(sv_doc.substr(0, pos))].push_back(docid);
+		size_t h = hash<string_view>{}(sv_doc.substr(0, pos));
+		index[h%10'000][h].push_back(docid);
 		sv_doc.remove_prefix(pos != sv_doc.npos ? pos +1: sv_doc.size());
 		while (!sv_doc.empty() && isspace(sv_doc.front())) {
 			sv_doc.remove_prefix(1);
@@ -135,13 +132,15 @@ void InvertedIndex::Add(string document) {
 	}
 }
 
-vector<size_t> InvertedIndex::Lookup(const string_view word) const {
-  if (auto it = index.find(word); it != index.end()) {
+const vector<size_t>& InvertedIndex::Lookup(size_t h) const {
+
+	const auto& bucket = index[h%10'000];
+
+  if (auto it = bucket.find(h); it != bucket.end()) {
     return it->second;
   } else {
     return empty_vec;
   }
 	
-//	return index[(hash<string_view>{}(word))%10'000'000];
 }
 
