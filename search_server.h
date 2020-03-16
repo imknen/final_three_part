@@ -21,8 +21,8 @@ using namespace std;
 class InvertedIndex {
 public:
 
-	InvertedIndex() : index(10'000,map<size_t, vector<size_t>>()){LOG_DURATION("time reserved"){docs.reserve(50'000);
-	}
+	InvertedIndex() : index(10'000,map<size_t, vector<size_t>>()){
+	docs.reserve(50'000);
 		
 	}
 
@@ -37,7 +37,6 @@ public:
 
 private:
   vector<map<size_t, vector<size_t>>> index;
-	
 	//deque<pair<string_view, size_t>> index;
   vector<string> docs;
 	vector <size_t> empty_vec;
@@ -52,6 +51,7 @@ public:
 
 private:
   InvertedIndex index;
+	bool baseempty;
 };
 
 

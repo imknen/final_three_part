@@ -13,16 +13,18 @@ SearchServer::SearchServer(istream& document_input) {
 }
 
 void SearchServer::UpdateDocumentBase(istream& document_input) {
-  //InvertedIndex new_index;
-LOG_DURATION("add Documents")
-{
-TotalDuration function_add("function_add_time ");
+	if (!document_input){baseempty = true; return;} 
+ InvertedIndex new_index;
+//LOG_DURATION("add Documents")
+//{
+//TotalDuration function_add("function_add_time ");
   for (string current_document; getline(document_input, current_document); ) {
-		ADD_DURATION(function_add);
-    index.Add(move(current_document));
+		//ADD_DURATION(function_add);
+   new_index.Add(move(current_document));
   }
-//  index = move(new_index);
-}
+	baseempty = false;
+  index = move(new_index);
+//}
 }
 
 	const unordered_map<size_t,size_t> SplitToMap(string_view s)
@@ -46,47 +48,41 @@ TotalDuration function_add("function_add_time ");
 void SearchServer::AddQueriesStream(
   istream& query_input, ostream& search_results_output
 ) {
+		if (baseempty) return;
+//	TotalDuration read("Total read");
+//	TotalDuration split("Total split");
+//	TotalDuration lookup("Total lookup");
+//	TotalDuration speed_sort("Topositiontal work sort");
+//	TotalDuration form_res("Forming result");
+//	TotalDuration fill_vec_pair("Total fill vect_pair");
 
-	TotalDuration read("Total read");
-	TotalDuration split("Total split");
-	TotalDuration lookup("Total lookup");
-	TotalDuration speed_sort("Topositiontal work sort");
-	TotalDuration form_res("Forming result");
-	TotalDuration fill_vec_pair("Total fill vect_pair");
-
-
-	map<string, vector<size_t>> query_hash;
-
+	unordered_map<string, size_t> queries;
 
   for (string current_query; getline(query_input, current_query); ) {
     vector<size_t> docid_count(50'000, 0);
-	 if (query_hash.count(current_query)) {docid_count = query_hash[current_query];} else {
     const auto words(SplitToMap(current_query));
 
-
-		{ADD_DURATION(lookup);
+		//{ADD_DURATION(lookup);
 
 		for (const auto& word : words) {
       for (const size_t docid : index.Lookup(word.first)) {
         docid_count[docid]+=word.second;
       }
     }
-		}
-		
-		}
+		//}
     vector<pair<size_t, size_t>> search_results;
 		search_results.reserve(50'000);
-		{
-		ADD_DURATION(fill_vec_pair);
+		//{
+		//ADD_DURATION(fill_vec_pair);
 		for (size_t i = 0;i < 50'000; i++) {
 			if (docid_count[i] > 0) {
 				search_results.push_back({i, docid_count[i]});
 			}
 		}
-		}
+		//}
 
-		{
-		ADD_DURATION(speed_sort);
+		//{
+		//ADD_DURATION(speed_sort);
 						partial_sort(
 							search_results.begin(),
 							search_results.begin() + min<size_t>(search_results.size(), 5),
@@ -95,9 +91,9 @@ void SearchServer::AddQueriesStream(
 								return make_pair(lhs.second, -static_cast<int64_t>(lhs.first)) > make_pair(rhs.second, -static_cast<int64_t>(rhs.first));
 							}
 						);
-		}
-		{
-		ADD_DURATION(form_res);
+		//}
+		//{
+		//ADD_DURATION(form_res);
     search_results_output << current_query << ':';
     for (auto [docid, hitcount] : Head(search_results, 5)) {
       search_results_output << " {"
@@ -105,7 +101,7 @@ void SearchServer::AddQueriesStream(
         << "hitcount: " << hitcount << '}';
     }
     search_results_output << '\n';
-		}
+		//}
   }
 }
 
