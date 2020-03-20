@@ -219,6 +219,7 @@ void TestBasicSearch() {
 
 int main() {
   TestRunner tr;
+//  TestSerpFormat();
   RUN_TEST(tr, TestSerpFormat);
   RUN_TEST(tr, TestTop5);
   RUN_TEST(tr, TestHitcount);
@@ -226,4 +227,5 @@ int main() {
   RUN_TEST(tr, TestBasicSearch);
 	
 	TestSpeed();
+	
 }
