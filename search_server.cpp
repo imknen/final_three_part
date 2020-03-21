@@ -30,15 +30,13 @@ void SearchServer::UpdateDocumentBase(istream& document_input) {
 	if (!document_input){baseempty = true; return;} 
  InvertedIndex new_index;
 
-LOG_DURATION("add Documents")
-{
-		
   new_index.AddDocuments(document_input);
 	{
 	size_t numberdoc = 0;
 	const size_t PAGE_SIZE =  3'000;
 	for  (const IteratorRange<deque<string>::const_iterator> range  : Paginate(new_index.GetDocuments(), PAGE_SIZE)) {
 	auto tmp = async(&InvertedIndex::FillIndex, &new_index, range, numberdoc);
+	//йцуке
 	numberdoc+=PAGE_SIZE; 
 	}
 	}
@@ -46,7 +44,6 @@ LOG_DURATION("add Documents")
 
 	lock_guard<mutex> lock_add(m);
 	swap(index,new_index);
-}
 }
 
 	const unordered_map<size_t,size_t> SplitToMap(string_view s)
@@ -71,6 +68,7 @@ LOG_DURATION("add Documents")
 void SearchServer::AddQueriesStream(
     std::istream& query_input, std::ostream& search_results_output
 ) {
+		if (baseempty) return;
     std::vector<std::string> queries;
     queries.reserve(500'000);
     for (std::string current_query; getline(query_input, current_query); ) {
@@ -107,8 +105,6 @@ string SearchServer::AddQueriesStreamSingleThread(
 std::vector<std::string>::iterator begin,
 std::vector<std::string>::iterator end
 ) {
-	TotalDuration query_time("query time");
-	ADD_DURATION(query_time);
 //	TotalDuration read("Total read");
 //	TotalDuration split("Total split");
 //	TotalDuration lookup("Total lookup");

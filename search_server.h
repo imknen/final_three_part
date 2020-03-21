@@ -58,7 +58,6 @@ public:
 
 private:
   vector<map<size_t, vector<size_t>>> index;
-	//deque<pair<string_view, size_t>> index;
   deque<string> docs;
 	vector <size_t> empty_vec;
 	mutex m_index;
